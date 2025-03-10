@@ -17,10 +17,12 @@ public class TableObject {
     public static final float WIDTH = 128;
     public static final float HEIGHT = 128;
     private static final float OBJECT_Y_POSITION = 135; // Posição fixa na mesa
+    private Type type;
 
     public TableObject(float x, Type type) {
         this.x = x;
         this.y = OBJECT_Y_POSITION;
+        this.type = type;
 
         switch (type) {
             case MILK_BOX:
@@ -44,6 +46,10 @@ public class TableObject {
 
     public void draw(SpriteBatch batch) {
         batch.draw(texture, x, y, texture.getWidth(), texture.getHeight());
+    }
+
+    public Type getType() {
+        return type;
     }
 
     public Rectangle getBounds() {

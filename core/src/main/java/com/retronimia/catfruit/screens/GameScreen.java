@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.retronimia.catfruit.entities.Coin;
@@ -40,6 +41,9 @@ public class GameScreen implements Screen {
     private static final float OBJECT_REMOVAL_LIMIT = VIRTUAL_WIDTH; // Limite para remover objetos
     private float lastObjectX = 0;
     private Random random;
+
+    private float targetZoom = 1.0f;
+    private float zoomSpeed = 3.0f;
 
     private boolean debugMode = false;
     private float speed = 300;
@@ -80,7 +84,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        camera.update();
         batch.setProjectionMatrix(camera.combined);
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
@@ -115,7 +118,40 @@ public class GameScreen implements Screen {
             }
         }
 
-        if (moveDirection == -1) { // Agora só gera ao andar para frente
+        // Verifica se o jogador está sobrepondo um objeto de cobertura
+        TableObject coveringObject = null;
+        for (TableObject obj : tableObjects) {
+            if (player.getBounds().overlaps(obj.getBounds()) &&
+                (obj.getType() == TableObject.Type.MILK_BOX || obj.getType() == TableObject.Type.JUICE_GLASS)) {
+                coveringObject = obj;
+                break;
+            }
+        }
+
+        // Se o jogador está sobrepondo um objeto válido e toca na tela, alterna o estado de escondido
+        if (coveringObject != null && Gdx.input.justTouched()) {
+            // Obtém a posição do toque na tela
+            float getTouchX = Gdx.input.getX();
+            float getTouchY = Gdx.input.getY();
+
+            float objX = coveringObject.getBounds().x + coveringObject.getBounds().width / 2 - Player.WIDTH / 2;
+            float objY = coveringObject.getBounds().y + 15;
+
+            // Converte a posição do toque para coordenadas do jogo
+            Vector3 worldTouch = new Vector3(getTouchX, getTouchY, 0);
+            camera.unproject(worldTouch);
+
+            // Verifica se o toque está dentro dos bounds do objeto
+            if (coveringObject.getBounds().contains(worldTouch.x, worldTouch.y)) {
+                player.toggleHide(objX, objY);
+                setTargetZoom(0.85f);
+            } else if (player.isHidden() && moveDirectionRaw != 0) {
+                player.toggleHide(objX, player.getOriginalY());
+                setTargetZoom(1.0f);
+            }
+        }
+
+        if (moveDirection == -1) { // Ao andar para frente
             float spawnX = getMaxObjectX() + DISTANCE_BETWEEN_OBJECTS; // Garante que o próximo spawn esteja sempre adiante
 
             if (spawnX < player.getBounds().x + VIRTUAL_WIDTH) { // Só gera objetos se estiver longe o suficiente
@@ -134,6 +170,10 @@ public class GameScreen implements Screen {
         });
 
         player.update(delta, moveDirection);
+
+        // Suaviza a transição do zoom com interpolação (Lerp)
+        camera.zoom += (targetZoom - camera.zoom) * zoomSpeed * delta;
+        camera.update();
 
         batch.begin();
         kitchenMap.draw(batch);
@@ -188,6 +228,10 @@ public class GameScreen implements Screen {
             }
         }
         return maxX;
+    }
+
+    public void setTargetZoom(float zoom) {
+        this.targetZoom = zoom;
     }
 
     @Override
