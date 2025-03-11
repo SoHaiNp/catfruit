@@ -128,6 +128,12 @@ public class GameScreen implements Screen {
             }
         }
 
+        if (coveringObject == null) {
+            System.out.println("null");
+        } else {
+            System.out.println(coveringObject.getType());
+        }
+
         // Se o jogador está sobrepondo um objeto válido e toca na tela, alterna o estado de escondido
         if (coveringObject != null && Gdx.input.justTouched()) {
             // Obtém a posição do toque na tela
@@ -142,13 +148,20 @@ public class GameScreen implements Screen {
             camera.unproject(worldTouch);
 
             // Verifica se o toque está dentro dos bounds do objeto
-            if (coveringObject.getBounds().contains(worldTouch.x, worldTouch.y)) {
+            if (coveringObject.getBounds().contains(worldTouch.x, worldTouch.y)) { // Se tocou no objeto, se esconde
                 player.toggleHide(objX, objY);
-                setTargetZoom(0.85f);
-            } else if (player.isHidden() && moveDirectionRaw != 0) {
+            } else if (player.isHidden() && moveDirectionRaw != 0) { // Se está escondido e começa a andar, sai do modo escondido
                 player.toggleHide(objX, player.getOriginalY());
-                setTargetZoom(1.0f);
             }
+
+        }
+
+        if (player.isHidden() && coveringObject == null) player.toggleHide(10, 10); // Se está escondido e sai da cobertura do objeto, sai do modo escondido
+
+        if (player.isHidden()) { // Se está escondido, aplica o zoom
+            setTargetZoom(0.85f);
+        } else { // Do contrário, tira o zoom
+            setTargetZoom(1.0f);
         }
 
         if (moveDirection == -1) { // Ao andar para frente
