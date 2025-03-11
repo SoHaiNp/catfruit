@@ -110,7 +110,7 @@ public class Player {
             targetY = originalY;
         }
 
-        System.out.println("Jogador escondido? " + isHidden + " | targetX: " + targetX + " | targetY: " + targetY);
+//        System.out.println("Jogador escondido? " + isHidden + " | targetX: " + targetX + " | targetY: " + targetY);
     }
 
     public boolean isHidden() {
