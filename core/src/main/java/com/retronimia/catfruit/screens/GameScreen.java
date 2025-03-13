@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -28,6 +29,8 @@ public class GameScreen implements Screen {
     private KitchenMap kitchenMap;
     private Player player;
     private HungryBoy hungryBoy;
+    private float enemySpawnTimer = 0f;
+    private float enemySpawnInterval;
 
     private ArrayList<Coin> coins;
     private static final int COIN_COUNT = 10;
@@ -49,8 +52,8 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         camera = new OrthographicCamera();
-//        viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
-        viewport = new FitViewport(VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, camera); // Possibilita ver outras partesdesenhadas  como debug
+        viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
+//        viewport = new FitViewport(VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, camera); // Possibilita ver outras partesdesenhadas  como debug
         viewport.apply();
         camera.position.set(VIRTUAL_WIDTH / 2f, VIRTUAL_HEIGHT / 2f, 0);
 
@@ -69,14 +72,14 @@ public class GameScreen implements Screen {
         tableObjects = new ArrayList<>();
         player = new Player(VIRTUAL_WIDTH / 2f - Player.WIDTH / 2f - 200, 100);
 
-        hungryBoy = new HungryBoy(Gdx.graphics.getWidth() / 2f - 50, Gdx.graphics.getHeight(), Gdx.graphics.getHeight() - 100);
-
         // Gera objetos iniciais na mesa antes do jogador se mover
         float startX = player.getBounds().x + 200; // Começa à frente do jogador
         for (int i = 0; i < 3; i++) { // Define quantos objetos iniciais queremos
             TableObject.Type type = TableObject.Type.values()[random.nextInt(TableObject.Type.values().length)];
             tableObjects.add(new TableObject(startX + i * DISTANCE_BETWEEN_OBJECTS, type));
         }
+
+        hungryBoy = new HungryBoy(-200, 275, 2f, 3f);
     }
 
     @Override
@@ -188,16 +191,39 @@ public class GameScreen implements Screen {
         camera.zoom += (targetZoom - camera.zoom) * zoomSpeed * delta;
         camera.update();
 
+        // Atualiza o timer para o spawn do HungryBoy
+        enemySpawnTimer += delta;
+
+        if (!hungryBoy.isActive() && enemySpawnTimer >= enemySpawnInterval) {
+            // Ativa o HungryBoy. Passa VIRTUAL_WIDTH e a posição X atual da câmera.
+            hungryBoy.activate(VIRTUAL_WIDTH);
+            enemySpawnTimer = 0;
+            enemySpawnInterval = MathUtils.random(10f, 20f);
+        }
+
         hungryBoy.update(delta);
 
+        // Atualiza o X do HungryBoy junto com o cenário (usando o mesmo fator aplicado a moedas ou objetos)
+        float movementX = moveDirection * speed * 0.9f * delta;
+        if (hungryBoy.isActive()) {
+            hungryBoy.updateX(movementX);
+        }
+
         batch.begin();
-        kitchenMap.draw(batch);
+
+        kitchenMap.drawBackground(batch); // Desenha o background
+
+        kitchenMap.drawMidground(batch);  // Desenha o midground
+        // Aqui podem vir outros elementos como objetos da mesa, moedas e jogador,
+        // caso façam sentido ficar entre o midground e o foreground
+
+        hungryBoy.draw(batch);            // Desenha o HungryBoy entre as camadas
+
+        kitchenMap.drawForeground(batch); // Desenha o foreground
 
         for (TableObject obj : tableObjects) {
             obj.draw(batch);
         }
-
-        hungryBoy.draw(batch);
 
         for (Coin coin : coins) {
             coin.draw(batch);
