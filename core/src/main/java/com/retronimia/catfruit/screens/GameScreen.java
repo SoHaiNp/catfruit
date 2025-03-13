@@ -10,10 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.retronimia.catfruit.entities.Coin;
-import com.retronimia.catfruit.entities.KitchenMap;
-import com.retronimia.catfruit.entities.Player;
-import com.retronimia.catfruit.entities.TableObject;
+import com.retronimia.catfruit.entities.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,6 +27,7 @@ public class GameScreen implements Screen {
 
     private KitchenMap kitchenMap;
     private Player player;
+    private HungryBoy hungryBoy;
 
     private ArrayList<Coin> coins;
     private static final int COIN_COUNT = 10;
@@ -51,8 +49,8 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         camera = new OrthographicCamera();
-        viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
-//        viewport = new FitViewport(VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, camera); // Possibilita ver outras partesdesenhadas  como debug
+//        viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
+        viewport = new FitViewport(VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, camera); // Possibilita ver outras partesdesenhadas  como debug
         viewport.apply();
         camera.position.set(VIRTUAL_WIDTH / 2f, VIRTUAL_HEIGHT / 2f, 0);
 
@@ -70,6 +68,8 @@ public class GameScreen implements Screen {
 
         tableObjects = new ArrayList<>();
         player = new Player(VIRTUAL_WIDTH / 2f - Player.WIDTH / 2f - 200, 100);
+
+        hungryBoy = new HungryBoy(Gdx.graphics.getWidth() / 2f - 50, Gdx.graphics.getHeight(), Gdx.graphics.getHeight() - 100);
 
         // Gera objetos iniciais na mesa antes do jogador se mover
         float startX = player.getBounds().x + 200; // Começa à frente do jogador
@@ -188,12 +188,16 @@ public class GameScreen implements Screen {
         camera.zoom += (targetZoom - camera.zoom) * zoomSpeed * delta;
         camera.update();
 
+        hungryBoy.update(delta);
+
         batch.begin();
         kitchenMap.draw(batch);
 
         for (TableObject obj : tableObjects) {
             obj.draw(batch);
         }
+
+        hungryBoy.draw(batch);
 
         for (Coin coin : coins) {
             coin.draw(batch);
@@ -279,5 +283,6 @@ public class GameScreen implements Screen {
         for (TableObject obj : tableObjects) {
             obj.dispose();
         }
+        hungryBoy.dispose();
     }
 }
