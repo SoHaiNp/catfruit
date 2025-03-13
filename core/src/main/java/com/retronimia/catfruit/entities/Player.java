@@ -1,11 +1,9 @@
 package com.retronimia.catfruit.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.retronimia.catfruit.screens.GameScreen;
 
 public class Player {
     private Texture texture;
