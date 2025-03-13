@@ -38,15 +38,6 @@ public class KitchenMap {
         }
     }
 
-    public void draw(SpriteBatch batch) {
-        batch.draw(background, bgX, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        batch.draw(background, bgX + VIRTUAL_WIDTH, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        batch.draw(midground, mgX, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        batch.draw(midground, mgX + VIRTUAL_WIDTH, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        batch.draw(foreground, fgX, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        batch.draw(foreground, fgX + VIRTUAL_WIDTH, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-    }
-
     public void drawBackground(SpriteBatch batch) {
         batch.draw(background, bgX, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
         batch.draw(background, bgX + VIRTUAL_WIDTH, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);

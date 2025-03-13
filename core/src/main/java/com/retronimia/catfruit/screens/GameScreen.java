@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
             tableObjects.add(new TableObject(startX + i * DISTANCE_BETWEEN_OBJECTS, type));
         }
 
-        hungryBoy = new HungryBoy(-200, 275, 2f, 3f);
+        hungryBoy = new HungryBoy(-200, 275, 2f);
     }
 
     @Override
@@ -201,12 +201,13 @@ public class GameScreen implements Screen {
             enemySpawnInterval = MathUtils.random(10f, 20f);
         }
 
-        hungryBoy.update(delta);
+        hungryBoy.update(delta, player, VIRTUAL_WIDTH);
 
-        // Atualiza o X do HungryBoy junto com o cenário (usando o mesmo fator aplicado a moedas ou objetos)
-        float movementX = moveDirection * speed * 0.9f * delta;
-        if (hungryBoy.isActive()) {
-            hungryBoy.updateX(movementX);
+        // Exemplo de cálculo do deslocamento horizontal (deltaX) do cenário:
+        float deltaX = moveDirection * speed * 0.9f * delta;
+        // Atualiza o movimento horizontal do HungryBoy:
+        if(hungryBoy.isActive()){
+            hungryBoy.updateX(deltaX);
         }
 
         batch.begin();
@@ -220,6 +221,9 @@ public class GameScreen implements Screen {
         hungryBoy.draw(batch);            // Desenha o HungryBoy entre as camadas
 
         kitchenMap.drawForeground(batch); // Desenha o foreground
+
+        hungryBoy.drawTableHands(batch, 125);
+        hungryBoy.drawHand(batch);
 
         for (TableObject obj : tableObjects) {
             obj.draw(batch);
